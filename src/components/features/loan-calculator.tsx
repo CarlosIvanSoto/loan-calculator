@@ -50,7 +50,7 @@ const LoanCalculator = () => {
   const [biweeklyPayment, setBiweeklyPayment] = useState<string>("");
   const [monthlyAmortizationSchedule, setMonthlyAmortizationSchedule] = useState<Payment[]>([])
   const [biweeklyAmortizationSchedule, setBiweeklyAmortizationSchedule] = useState<Payment[]>([])
-  const [dayAmortizationSchedule, setDayAmortizationSchedule] = useState<Payment[]>([])
+  // const [dayAmortizationSchedule, setDayAmortizationSchedule] = useState<Payment[]>([])
 
   const terms = [3, 6, 12, 24, 36, 48, 60]
 
@@ -168,34 +168,12 @@ const LoanCalculator = () => {
 
     }, initialPayment)
 
-    setDayAmortizationSchedule(daySchedule)
+    // setDayAmortizationSchedule(daySchedule)
     setBiweeklyAmortizationSchedule(biweeklySchedule)
     setMonthlyAmortizationSchedule(monthlySchedule)
 
   }, [loanStartDate, loanAmount, loanTerm, interestRate, includeIVA, iva])
   
-
-  // const calculatePayments = () => {
-  //   const monthlyRate = interestRate / 1200; // Convert annual rate to monthly
-  //   const numPayments = loanTerm;
-
-  //   const monthlyPayment =
-  //     loanAmount *
-  //     (monthlyRate / (1 - Math.pow(1 + monthlyRate, -numPayments)));
-  //   const totalInterest = monthlyPayment * numPayments - loanAmount;
-
-  //   if (includeIVA) {
-  //     const vatRate = (iva/100); // 19% VAT rate
-  //     const interestVAT = totalInterest * vatRate;
-  //     const totalPayment = monthlyPayment + interestVAT / numPayments;
-  //     setMonthlyPayment(totalPayment.toFixed(2));
-  //     setBiweeklyPayment((totalPayment / 2).toFixed(2));
-  //   } else {
-  //     setMonthlyPayment(monthlyPayment.toFixed(2));
-  //     setBiweeklyPayment((monthlyPayment / 2).toFixed(2));
-  //   }
-  // };
-
   return (
     <div className="flex space-x-4">
       <Card className="w-full max-w-md">
