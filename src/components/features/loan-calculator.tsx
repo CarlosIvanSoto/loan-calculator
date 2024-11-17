@@ -40,10 +40,11 @@ export type Payment = {
 
 const LoanCalculator = () => {
   const [loanStartDate, setLoanStartDate] = useState<Date | undefined>(new Date())
-  const [loanAmount, setLoanAmount] = useState<number>(56200);
+  const [loanAmount, setLoanAmount] = useState<number>(10000);
   const [loanTerm, setLoanTerm] = useState<number>(60);
-  const [interestRate, setInterestRate] = useState<number>(26.14);
+  const [interestRate, setInterestRate] = useState<number>(10);
   const [includeIVA, setIncludeIVA] = useState<boolean>(true);
+  const [iva, setIVA] = useState<number>(19);
   
   const [monthlyPayment, setMonthlyPayment] = useState<string>("");
   const [biweeklyPayment, setBiweeklyPayment] = useState<string>("");
@@ -54,7 +55,6 @@ const LoanCalculator = () => {
   const terms = [3, 6, 12, 24, 36, 48, 60]
 
   useEffect(() => {
-
     const monthlyRate = interestRate / 1200 // Convert annual rate to monthly
     const monthlyFee = (loanAmount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -loanTerm))
     // const monthlyFee = (loanAmount * monthlyRate) / (1 - (1 + monthlyRate)** -loanTerm)
@@ -68,7 +68,7 @@ const LoanCalculator = () => {
     const biweeklyInterest = loanAmount * biweeklyRate
     
     if (includeIVA) {
-      const ivaRate = 0.16 // 16% IVA rate
+      const ivaRate = iva/100
       const monthlyPayment = monthlyFee + monthlyInterest * ivaRate
       const biweeklyPayment = biweeklyFee + biweeklyInterest * ivaRate
 
@@ -107,7 +107,7 @@ const LoanCalculator = () => {
       const biweeklyPayment = dayPayment * daysPayment
       const interestPayment = prev.remainingBalance * (dayRate * daysPayment)
       const principalPayment = biweeklyPayment - interestPayment;
-      const IvaAmount = includeIVA ? interestPayment * 0.16 : 0;
+      const IvaAmount = includeIVA ? interestPayment * (iva/100) : 0;
       const newSchedule: Payment = {
         number: x + 1, // numero
         days: daysPayment, // días
@@ -129,7 +129,7 @@ const LoanCalculator = () => {
       const daysPayment = differenceInDays(dueDatePayment, prev.dueDate)
       const interestPayment = prev.remainingBalance * biweeklyRate
       const principalPayment = biweeklyFee - interestPayment;
-      const IvaAmount = includeIVA ? interestPayment * 0.16 : 0;
+      const IvaAmount = includeIVA ? interestPayment * (iva/100) : 0;
       const newSchedule: Payment = {
         number: x + 1, // numero
         days: daysPayment, // días
@@ -151,7 +151,7 @@ const LoanCalculator = () => {
       const daysPayment = differenceInDays(dueDatePayment, prev.dueDate)
       const interestPayment = prev.remainingBalance * monthlyRate;
       const principalPayment = monthlyFee - interestPayment;
-      const IvaAmount = includeIVA ? interestPayment * 0.16 : 0;
+      const IvaAmount = includeIVA ? interestPayment * (iva/100) : 0;
       const newSchedule: Payment = {
         number: x + 1,
         days: daysPayment,
@@ -172,7 +172,7 @@ const LoanCalculator = () => {
     setBiweeklyAmortizationSchedule(biweeklySchedule)
     setMonthlyAmortizationSchedule(monthlySchedule)
 
-  }, [loanStartDate, loanAmount, loanTerm, interestRate, includeIVA])
+  }, [loanStartDate, loanAmount, loanTerm, interestRate, includeIVA, iva])
   
 
   // const calculatePayments = () => {
@@ -185,7 +185,7 @@ const LoanCalculator = () => {
   //   const totalInterest = monthlyPayment * numPayments - loanAmount;
 
   //   if (includeIVA) {
-  //     const vatRate = 0.16; // 19% VAT rate
+  //     const vatRate = (iva/100); // 19% VAT rate
   //     const interestVAT = totalInterest * vatRate;
   //     const totalPayment = monthlyPayment + interestVAT / numPayments;
   //     setMonthlyPayment(totalPayment.toFixed(2));
@@ -197,7 +197,7 @@ const LoanCalculator = () => {
   // };
 
   return (
-    <section className="flex space-x-4">
+    <div className="flex space-x-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           {/* <CardTitle>Loan Repayment Calculator</CardTitle> */}
@@ -279,8 +279,20 @@ const LoanCalculator = () => {
               />
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="grid grid-cols-2 gap-2">
+              <Label htmlFor="iva">IVA de préstamo</Label>
               <Label htmlFor="includeIVA">Incluir IVA</Label>
+
+              <Input
+                id="iva"
+                type="number"
+                min="0"
+                max="50"
+                step="0.1"
+                value={iva}
+                onChange={(e) => setIVA(Number(e.target.value))}
+              />
+
               <Switch
                 id="includeIVA"
                 checked={includeIVA}
@@ -347,10 +359,10 @@ const LoanCalculator = () => {
         </div>
         )}
         <Tabs defaultValue="biweekly">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="biweekly">QUINCENAL</TabsTrigger>
-            <TabsTrigger value="monthly">MENSUAL</TabsTrigger>
-            <TabsTrigger value="dayBiweekly">QUINCENAL (día)</TabsTrigger>
+          <TabsList className="">
+            <TabsTrigger value="biweekly">Quincenal</TabsTrigger>
+            <TabsTrigger value="monthly">Mensual</TabsTrigger>
+            {/* <TabsTrigger value="dayBiweekly">QUINCENAL (día)</TabsTrigger> */}
           </TabsList>
           <TabsContent value="biweekly">
             <LoanTable data={biweeklyAmortizationSchedule}/>
@@ -358,13 +370,13 @@ const LoanCalculator = () => {
           <TabsContent value="monthly">
             <LoanTable data={monthlyAmortizationSchedule} />
           </TabsContent>
-          <TabsContent value="dayBiweekly">
+          {/* <TabsContent value="dayBiweekly">
             <LoanTable data={dayAmortizationSchedule} visibility={{ days: true}}/>
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
       </section>
       {/* <pre>{JSON.stringify({table: amortizationSchedule}, null, 2)}</pre> */}
-    </section>
+    </div>
   )
 };
 
